@@ -1,16 +1,14 @@
 from agents.function_caller import FunctionCaller
 from chain.base_handler import BaseHandler, ChainContext
 from entity.ChainContextEntity import StrategyPlan
-from providers.Deepseek import DeepSeekChat
 
 
 class StrategyPlanner(BaseHandler):
     """策略规划处理器 - 分析问题并制定解决策略"""
     
-    def __init__(self, api_key:str = None, model: str = "deepseek-chat"):
+    def __init__(self, api_key:str = None):
         super().__init__()
-        self.chat = DeepSeekChat(model, api_key)
-        self.function_caller = FunctionCaller()
+        self.function_caller = FunctionCaller(api_key)
     
     def _process(self, context: ChainContext) -> ChainContext:
         """分析问题并制定解决策略"""
