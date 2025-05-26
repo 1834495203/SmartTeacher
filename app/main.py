@@ -218,12 +218,6 @@ def main():
                     # 获取处理步骤
                     steps = math_chain.get_processing_steps(context)
 
-                    context = ChainContext(
-                        problem="111",
-                        user_background="222"
-                    )
-                    context.final_answer = "123"
-
                     # 显示处理过程
                     st.success("✨ 处理完成！")
 
