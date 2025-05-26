@@ -5,9 +5,9 @@ from providers.Deepseek import DeepSeekChat
 class AnswerSynthesizer(BaseHandler):
     """答案整合处理器 - 整合所有信息生成最终答案"""
     
-    def __init__(self, model: str = "deepseek-reasoner"):
+    def __init__(self, api_key:str = None, model: str = "deepseek-reasoner"):
         super().__init__()
-        self.chat = DeepSeekChat(model)
+        self.chat = DeepSeekChat(model, api_key)
     
     def _process(self, context: ChainContext) -> ChainContext:
         """整合所有信息生成最终答案"""

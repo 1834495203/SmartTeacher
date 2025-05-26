@@ -7,11 +7,11 @@ from chain.answer_synthesizer import AnswerSynthesizer
 class MathChain:
     """数学问题处理责任链"""
     
-    def __init__(self):
+    def __init__(self, api_key):
         # 创建处理器
-        self.strategy_planner = StrategyPlanner()
+        self.strategy_planner = StrategyPlanner(api_key)
         self.tool_executor = ToolExecutor()
-        self.answer_synthesizer = AnswerSynthesizer()
+        self.answer_synthesizer = AnswerSynthesizer(api_key)
         
         # 构建责任链
         self.strategy_planner.set_next(self.tool_executor).set_next(self.answer_synthesizer)

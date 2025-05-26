@@ -7,9 +7,9 @@ from providers.Deepseek import DeepSeekChat
 class StrategyPlanner(BaseHandler):
     """策略规划处理器 - 分析问题并制定解决策略"""
     
-    def __init__(self, model: str = "deepseek-chat"):
+    def __init__(self, api_key:str = None, model: str = "deepseek-chat"):
         super().__init__()
-        self.chat = DeepSeekChat(model)
+        self.chat = DeepSeekChat(model, api_key)
         self.function_caller = FunctionCaller()
     
     def _process(self, context: ChainContext) -> ChainContext:
