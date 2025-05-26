@@ -8,7 +8,7 @@ from tools.math_tools import MATH_TOOLS
 
 class FunctionCaller:
     def __init__(self, api_key: str = None):
-        self.chat = DeepSeekChat(api_key)
+        self.chat = DeepSeekChat(api_key=api_key, model="deepseek-chat")
         
     def analyze(self, problem: str, user_background: str) -> FunctionResponse:
         """分析问题并判断是否需要调用函数"""

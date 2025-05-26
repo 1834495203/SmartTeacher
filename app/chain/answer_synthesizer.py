@@ -7,7 +7,7 @@ class AnswerSynthesizer(BaseHandler):
     
     def __init__(self, api_key:str = None, model: str = "deepseek-reasoner"):
         super().__init__()
-        self.chat = DeepSeekChat(model, api_key)
+        self.chat = DeepSeekChat(api_key=api_key, model=model)
     
     def _process(self, context: ChainContext) -> ChainContext:
         """整合所有信息生成最终答案"""
