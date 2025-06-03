@@ -18,6 +18,8 @@ class StrategyPlanner(BaseHandler):
             response = self.function_caller.analyze(context.problem, context.user_background)
 
             print("strategy planner:\n", response)
+
+            context.strategy_plan.analysis = response.analysis
             
             # 解析工具调用
             if response.need_function:

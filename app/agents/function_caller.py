@@ -9,11 +9,7 @@ from tools.math_tools import MATH_TOOLS
 class FunctionCaller:
     def __init__(self, api_key: str = None):
         self.chat = DeepSeekChat(api_key=api_key, model="deepseek-chat")
-        
-    def analyze(self, problem: str, user_background: str) -> FunctionResponse:
-        """分析问题并判断是否需要调用函数"""
-        
-        system_prompt = f"""你是一个数学问题分析专家。用户背景：{user_background}
+        self.function_caller_prompt = f"""你是一个数学问题分析专家。
         
 Function calling工具定义:
 {MATH_TOOLS}
@@ -50,12 +46,15 @@ Function calling工具定义:
 注意：
 1. 只有在需要精确计算、解方程或分析函数时才调用函数
 2. 简单的概念解释不需要调用函数
-3. 确保参数格式正确"""
+3. 确保参数格式正确 \n"""
+        
+    def analyze(self, problem: str, user_background: str) -> FunctionResponse:
+        """分析问题并判断是否需要调用函数"""
 
         try:
             response = self.chat.chatting(
                 user_input=f"请分析这个数学问题：{problem}",
-                system_prompt=system_prompt
+                system_prompt=self.function_caller_prompt + f"用户的教育背景为{user_background}"
             )
             
             # 解析响应

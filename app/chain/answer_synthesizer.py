@@ -5,21 +5,10 @@ from providers.Deepseek import DeepSeekChat
 class AnswerSynthesizer(BaseHandler):
     """答案整合处理器 - 整合所有信息生成最终答案"""
     
-    def __init__(self, api_key:str = None, model: str = "deepseek-reasoner"):
+    def __init__(self, api_key:str = None, model: str = "deepseek-reasoner", custom_prompt: str = ""):
         super().__init__()
         self.chat = DeepSeekChat(api_key=api_key, model=model)
-    
-    def _process(self, context: ChainContext) -> ChainContext:
-        """整合所有信息生成最终答案"""
-        
-        # 构建完整的上下文信息
-        context_info = self._build_context_info(context)
-        
-        system_prompt = f"""你是一个专业的数学家教，需要根据学生的教育背景提供个性化的数学指导。
-
-学生背景：{context.user_background}
-
-你已经获得了以下信息：
+        base_prompt = f"""你已经获得了以下信息：
 1. 问题分析和解决策略
 2. 工具计算结果（如果有）
 
@@ -30,6 +19,16 @@ class AnswerSynthesizer(BaseHandler):
 - 整合工具计算结果到解答中
 - 给出学习建议和相关知识点
 - 确保答案准确且易于理解"""
+        
+        self.answer_synthesizer_prompt = base_prompt
+        if custom_prompt and custom_prompt.strip():
+            self.answer_synthesizer_prompt += f"\n\n附加要求：\n{custom_prompt}"
+    
+    def _process(self, context: ChainContext) -> ChainContext:
+        """整合所有信息生成最终答案"""
+        
+        # 构建完整的上下文信息
+        context_info = self._build_context_info(context)
 
         user_message = f"""
 原始问题：{context.problem}
@@ -42,11 +41,11 @@ class AnswerSynthesizer(BaseHandler):
         try:
             # 调用API生成最终答案
             messages = [
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": self.answer_synthesizer_prompt},
                 {"role": "user", "content": user_message}
             ]
 
-            print(f"final prompt:\n {system_prompt}")
+            print(f"final prompt:\n {self.answer_synthesizer_prompt}")
             print(f"first user message:\n {user_message}")
             
             response = self.chat.call_api(messages, stream=False)

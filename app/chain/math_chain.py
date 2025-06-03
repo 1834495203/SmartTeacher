@@ -11,15 +11,27 @@ class MathChain:
         # 创建处理器
         self.strategy_planner = StrategyPlanner(api_key)
         self.tool_executor = ToolExecutor()
-        self.answer_synthesizer = AnswerSynthesizer(api_key)
+        # AnswerSynthesizer 将在 process 方法中根据传入的 prompt 初始化
+        # self.answer_synthesizer = AnswerSynthesizer(api_key) 
         
-        # 构建责任链
-        self.strategy_planner.set_next(self.tool_executor).set_next(self.answer_synthesizer)
+        # 构建责任链的一部分，AnswerSynthesizer 的链接将在 process 中动态完成
+        self.strategy_planner.set_next(self.tool_executor)
     
-    def process(self, problem: str, user_background: str) -> ChainContext:
+    def process(self, problem: str, user_background: str, custom_prompt: str = "") -> ChainContext:
         """处理数学问题"""
         # 创建上下文
         context = ChainContext(problem, user_background)
+        
+        # 根据 custom_prompt 初始化 AnswerSynthesizer
+        # 注意：这里假设 api_key 是 MathChain 的一个属性，或者可以从其他地方获取
+        # 如果 api_key 不是 self.api_key, 需要调整
+        answer_synthesizer = AnswerSynthesizer(api_key=self.strategy_planner.chat.api_key, custom_prompt=custom_prompt)
+        
+        # 构建完整的责任链
+        current_handler = self.strategy_planner
+        while current_handler.next_handler:
+            current_handler = current_handler.next_handler
+        current_handler.set_next(answer_synthesizer)
         
         # 开始处理链
         result_context = self.strategy_planner.handle(context)
