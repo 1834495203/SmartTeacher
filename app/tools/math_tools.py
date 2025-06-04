@@ -290,7 +290,7 @@ FUNCTION_DESCRIPTIONS = """
    - 适用场景：需要分析函数性质、求导数、找极值点时
 
 4. draw_plot(plot_type, functions, x_range, y_range, points, shapes, title, xlabel, ylabel, grid, save_path, figure_size, dpi)
-   - 功能：绘制函数图像或几何图形并保存到文件
+   - 功能：绘制函数图像或几何图形
    - 参数：
      * plot_type: "function"(函数图像), "geometry"(几何图形), "mixed"(混合)
      * functions: 函数表达式字符串或列表
@@ -298,7 +298,7 @@ FUNCTION_DESCRIPTIONS = """
      * points: 点坐标列表
      * shapes: 几何图形描述列表
      * 其他参数用于自定义图像样式
-   - 适用场景：需要可视化函数图像、绘制几何图形、生成数学图表时
+   - 适用场景：需要可视化函数图像、绘制几何图形、分析函数或几何图形性质时
 
 请根据问题类型判断是否需要调用这些函数。
 """
@@ -402,7 +402,7 @@ MATH_TOOLS = [
         "type": "function",
         "function": {
             "name": "draw_plot",
-            "description": "绘制函数或几何图形并保存至文件",
+            "description": "绘制函数或几何图形，用户可直观看见函数或几何图形的形状",
             "parameters": {
                 "type": "object",
                 "properties": {

@@ -18,7 +18,8 @@ class AnswerSynthesizer(BaseHandler):
 - 提供清晰的步骤说明
 - 整合工具计算结果到解答中
 - 给出学习建议和相关知识点
-- 确保答案准确且易于理解"""
+- 确保答案准确且易于理解
+- 请用 $ 包裹latex语句"""
         
         self.answer_synthesizer_prompt = base_prompt
         if custom_prompt and custom_prompt.strip():
@@ -34,6 +35,8 @@ class AnswerSynthesizer(BaseHandler):
 原始问题：{context.problem}
 
 {context_info}
+
+学生背景：{context.user_background}
 
 请为学生提供完整的解答和指导。
 """
@@ -53,7 +56,7 @@ class AnswerSynthesizer(BaseHandler):
 
             print(f"final prompt:\n {self.answer_synthesizer_prompt}")
             print(f"first user message:\n {user_message}")
-            print(f"final messages:\n {messages}")
+            # print(f"final messages:\n {messages}")
             
             response = self.chat.call_api(messages, stream=False)
             parsed_response = self.chat._parse_response(response)
