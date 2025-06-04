@@ -18,8 +18,6 @@ class StrategyPlanner(BaseHandler):
             response = self.function_caller.analyze(context.problem, context.user_background)
 
             print("strategy planner:\n", response)
-
-            context.strategy_plan.analysis = response.analysis
             
             # 解析工具调用
             if response.need_function:
@@ -27,7 +25,8 @@ class StrategyPlanner(BaseHandler):
                 context.strategy_plan = StrategyPlan(
                     reasoning=response.reasoning,
                     tool_calls=response.function_results,
-                    needs_tools=True
+                    needs_tools=True,
+                    analysis=response.analysis
                 )
             
             context.metadata["strategy_planner"] = "completed"

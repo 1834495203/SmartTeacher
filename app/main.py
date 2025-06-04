@@ -71,45 +71,45 @@ def show_error_collection():
     """显示错题集页面"""
     st.header("📚 错题集")
     
-    questions = load_questions_from_jsonl(JSONL_FILE_PATH)
-    
-    if not questions:
-        st.info("暂无保存的问题")
-        return
-    
-    # 按时间倒序排列
-    questions.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-    
-    # 搜索功能
-    search_term = st.text_input("🔍 搜索问题：", placeholder="输入关键词搜索...")
-    
-    if search_term:
-        questions = [q for q in questions if search_term.lower() in q.get('problem', '').lower()]
-    
-    st.write(f"共找到 {len(questions)} 个问题")
-    
+    quest = load_questions_from_jsonl(JSONL_FILE_PATH)
+
+    qs = []
+
+    for questions in quest:
+        if not questions:
+            st.info("暂无保存的问题")
+            return
+
+        # 按时间倒序排列
+        questions.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+        qs.append(questions)
+
+    st.write(f"共找到 {len(qs)} 个问题")
+
     # 分页显示
     items_per_page = 5
-    total_pages = (len(questions) - 1) // items_per_page + 1 if questions else 0
-    
+    total_pages = (len(qs) - 1) // items_per_page + 1 if qs else 0
+
     if total_pages > 0:
         page = st.selectbox("选择页面：", range(1, total_pages + 1)) - 1
         start_idx = page * items_per_page
-        end_idx = min(start_idx + items_per_page, len(questions))
-        
-        for i, question in enumerate(questions[start_idx:end_idx], start_idx + 1):
-            with st.expander(f"问题 {i}: {question.get('problem', '')[:50]}..."):
-                st.write(f"**提问时间：** {question.get('timestamp', 'N/A')}")
-                st.write(f"**用户背景：** {question.get('user_background', 'N/A')}")
-                st.write(f"**问题：** {question.get('problem', 'N/A')}")
-                st.write("**解答：**")
-                st.markdown(question.get('answer', 'N/A'))
-                
-                # 删除按钮
-                if st.button(f"🗑️ 删除", key=f"delete_{i}"):
-                    if delete_question_from_jsonl(i - 1, JSONL_FILE_PATH):
-                        st.success("问题已删除")
-                        st.rerun()
+        end_idx = min(start_idx + items_per_page, len(qs))
+
+        for i, question in enumerate(qs[start_idx:end_idx], start_idx + 1):
+            for q in question:
+                with st.expander(f"问题 {i}: {q.get('question', '')[:50]}..."):
+                    st.write(f"**提问时间：** {q.get('timestamp', 'N/A')}")
+                    st.write(f"**用户背景：** {q.get('user_background', 'N/A')}")
+                    st.write(f"**问题：** {q.get('question', 'N/A')}")
+                    st.write("**解答：**")
+                    st.markdown(q.get('answer', 'N/A'))
+
+                    # 删除按钮
+                    if st.button(f"🗑️ 删除", key=f"delete_{i}"):
+                        if delete_question_from_jsonl(i - 1, JSONL_FILE_PATH):
+                            st.success("问题已删除")
+                            st.rerun()
 
 
 def delete_question_from_jsonl(index, file_path="data/questions.jsonl"):
@@ -262,7 +262,8 @@ def main():
             if st.button(f"示例 {i+1}: {example}", key=f"example_{i}"):
                 st.session_state.current_problem = example
                 st.session_state.problem_solved = False
-                # st.rerun()
+                problem = example
+                st.rerun()
 
         # 更新当前问题
         if problem != st.session_state.current_problem:
@@ -287,68 +288,69 @@ def main():
             with st.spinner("正在处理问题..."):
                 try:
                     st.session_state.is_save = False
-                    # # 初始化责任链
-                    # math_chain = MathChain(api_key)
+                    # 初始化责任链
+                    math_chain = MathChain(api_key)
                     
-                    # # 获取选中的prompt内容
-                    # selected_prompt_text = existing_prompts.get(selected_prompt_name, "")
+                    # 获取选中的prompt内容
+                    selected_prompt_text = existing_prompts.get(selected_prompt_name, "")
 
-                    # # 处理问题
-                    # context = math_chain.process(problem, user_background, selected_prompt_text)
+                    # 处理问题
+                    context = math_chain.process(problem, user_background, selected_prompt_text,
+                                                 st.session_state.conversation_history)
 
-                    # # 获取处理步骤
-                    # steps = math_chain.get_processing_steps(context)
+                    # 获取处理步骤
+                    steps = math_chain.get_processing_steps(context)
 
-                    # # 显示处理过程
-                    # st.success("✨ 处理完成！")
+                    # 显示处理过程
+                    st.success("✨ 处理完成！")
 
-                    # # 显示处理步骤
-                    # with st.expander("🔍 查看处理过程", expanded=False):
+                    # 显示处理步骤
+                    with st.expander("🔍 查看处理过程", expanded=False):
 
-                    #     # 策略规划步骤
-                    #     st.subheader("1️⃣ 策略规划")
-                    #     strategy_status = steps["strategy_planning"]["status"]
-                    #     if strategy_status == "completed":
-                    #         st.success("✅ 策略规划完成")
-                    #         strategy_content = steps["strategy_planning"]["content"]
-                    #         if strategy_content:
-                    #             st.write("**问题分析：**")
-                    #             st.write(strategy_content.analysis)
-                    #             if strategy_content.needs_tools:
-                    #                 st.info(f"📋 需要使用 {len(strategy_content.tool_calls)} 个工具")
-                    #     else:
-                    #         st.error("❌ 策略规划失败")
+                        # 策略规划步骤
+                        st.subheader("1️⃣ 策略规划")
+                        strategy_status = steps["strategy_planning"]["status"]
+                        if strategy_status == "completed":
+                            st.success("✅ 策略规划完成")
+                            strategy_content = steps["strategy_planning"]["content"]
+                            if strategy_content:
+                                st.write("**问题分析：**")
+                                st.write(strategy_content.analysis)
+                                if strategy_content.needs_tools:
+                                    st.info(f"📋 需要使用 {len(strategy_content.tool_calls)} 个工具")
+                        else:
+                            st.error("❌ 策略规划失败")
 
-                    #     # 工具执行步骤
-                    #     st.subheader("2️⃣ 工具执行")
-                    #     tool_status = steps["tool_execution"]["status"]
-                    #     if tool_status == "completed":
-                    #         st.success("✅ 工具执行完成")
-                    #         tool_content = steps["tool_execution"]["content"]
-                    #         if tool_content and tool_content.executed:
-                    #             st.write(f"**执行摘要：** {tool_content.summary}")
-                    #             if tool_content.results:
-                    #                 for result in tool_content.results:
-                    #                     if result.success:
-                    #                         st.write(f"🔧 {result.tool_name}: ✅")
-                    #                     else:
-                    #                         st.write(f"🔧 {result.tool_name}: ❌")
-                    #     elif tool_status == "skipped":
-                    #         st.info("⏭️ 无需使用工具")
-                    #     else:
-                    #         st.error("❌ 工具执行失败")
+                        # 工具执行步骤
+                        st.subheader("2️⃣ 工具执行")
+                        tool_status = steps["tool_execution"]["status"]
+                        if tool_status == "completed":
+                            st.success("✅ 工具执行完成")
+                            tool_content = steps["tool_execution"]["content"]
+                            if tool_content and tool_content.executed:
+                                st.write(f"**执行摘要：** {tool_content.summary}")
+                                if tool_content.results:
+                                    for result in tool_content.results:
+                                        if result.success:
+                                            st.write(f"🔧 {result.tool_name}: ✅")
+                                        else:
+                                            st.write(f"🔧 {result.tool_name}: ❌")
+                        elif tool_status == "skipped":
+                            st.info("⏭️ 无需使用工具")
+                        else:
+                            st.error("❌ 工具执行失败")
 
-                    #     # 答案整合步骤
-                    #     st.subheader("3️⃣ 答案整合")
-                    #     answer_status = steps["answer_synthesis"]["status"]
-                    #     if answer_status == "completed":
-                    #         st.success("✅ 答案整合完成")
-                    #     else:
-                    #         st.error("❌ 答案整合失败")
+                        # 答案整合步骤
+                        st.subheader("3️⃣ 答案整合")
+                        answer_status = steps["answer_synthesis"]["status"]
+                        if answer_status == "completed":
+                            st.success("✅ 答案整合完成")
+                        else:
+                            st.error("❌ 答案整合失败")
                     
                     # 模拟处理过程
-                    context = ChainContext(problem, user_background)
-                    context.final_answer = "123"
+                    # context = ChainContext(problem, user_background)
+                    # context.final_answer = "123"
 
                     # 保存到会话状态
                     st.session_state.current_context = context
@@ -359,13 +361,17 @@ def main():
                     # 显示最终答案
                     if st.session_state.answer_generated and st.session_state.current_answer:
                         st.markdown("### 📚 详细解答")
+                        img_path = context.metadata.get("img_path", None)
+                        if img_path:
+                            st.image(context.metadata.get("img_path", None), use_container_width=True)
                         st.markdown(st.session_state.current_answer)
 
                         # 添加到对话历史（只添加一次）
                         current_conv = {
                             'question': st.session_state.current_problem,
                             'answer': st.session_state.current_answer,
-                            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            'user_background': user_background
                         }
 
                         # 检查是否已经添加过这个对话
@@ -390,10 +396,10 @@ def main():
                     'conversation_history': st.session_state.conversation_history.copy()
                 }
 
-                if save_question_to_jsonl(question_data, JSONL_FILE_PATH):
+                if save_question_to_jsonl(st.session_state.conversation_history, JSONL_FILE_PATH):
                     st.success("✅ 问题已保存到错题集！")
                     # 清除相关状态
-                    st.session_state.conversation_history = []
+                    # st.session_state.conversation_history = []
                     st.session_state.current_problem = ""
                     st.session_state.problem_solved = True
                     st.session_state.answer_generated = False

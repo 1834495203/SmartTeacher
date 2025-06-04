@@ -30,12 +30,17 @@ class ToolExecutor(BaseHandler):
                 # 执行工具
                 result = execute_tool(tool_name, arguments)
 
+                print(f"tool executor: \n{result}")
+
                 executed_results.append(ToolExecutionResult(
                     tool_name=tool_name,
                     arguments=arguments,
                     result=result,
-                    success=result.get("success", False)
+                    success=result.get("success", False),
+                    img_path=result.get("file_path", None)
                 ))
+
+                context.metadata["img_path"] = result.get("file_path", None)
             
             # 生成工具执行摘要
             successful_tools = [r for r in executed_results if r.success]

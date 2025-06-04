@@ -3,13 +3,14 @@ import re
 
 from entity.ChainContextEntity import FunctionCall, FunctionResponse
 from providers.Deepseek import DeepSeekChat
-from tools.math_tools import MATH_TOOLS
+from tools.math_tools import MATH_TOOLS, FUNCTION_DESCRIPTIONS
 
 
 class FunctionCaller:
     def __init__(self, api_key: str = None):
         self.chat = DeepSeekChat(api_key=api_key, model="deepseek-chat")
         self.function_caller_prompt = f"""你是一个数学问题分析专家。
+{FUNCTION_DESCRIPTIONS}
         
 Function calling工具定义:
 {MATH_TOOLS}

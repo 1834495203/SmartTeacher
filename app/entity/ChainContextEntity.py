@@ -6,6 +6,7 @@ class ToolExecutionResult(BaseModel):
     arguments: Dict[str, Any]
     result: Dict[str, Any]
     success: bool
+    img_path: Optional[str] = None
 
 class ToolResults(BaseModel):
     executed: bool

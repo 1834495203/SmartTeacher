@@ -42,11 +42,18 @@ class AnswerSynthesizer(BaseHandler):
             # 调用API生成最终答案
             messages = [
                 {"role": "system", "content": self.answer_synthesizer_prompt},
-                {"role": "user", "content": user_message}
+                {"role": "system", "content": user_message}
             ]
+
+            chat_history = context.metadata["chat_history"]
+
+            if chat_history:
+                messages.append({"role": "user", "content": chat_history["question"]})
+                messages.append({"role": "assistant", "content": chat_history["answer"]})
 
             print(f"final prompt:\n {self.answer_synthesizer_prompt}")
             print(f"first user message:\n {user_message}")
+            print(f"final messages:\n {messages}")
             
             response = self.chat.call_api(messages, stream=False)
             parsed_response = self.chat._parse_response(response)
